@@ -1,15 +1,18 @@
 {
   "name": "hardhat",
   "version": "1.0.0",
-  "description": "Smart contracts for tmp",
+  "description": "Smart contracts for contracts",
   "main": "index.js",
   "scripts": {
     "build": "hardhat compile",
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy": "hardhat ignition deploy ignition/modules/Lock.ts",
-    "deploy:alfajores": "hardhat ignition deploy ignition/modules/Lock.ts --network alfajores",
+    "deploy:sepolia": "hardhat ignition deploy ignition/modules/Lock.ts --network sepolia",
     "deploy:celo": "hardhat ignition deploy ignition/modules/Lock.ts --network celo",
+    "deploy:goodcred:sepolia": "hardhat ignition deploy ignition/modules/GoodCred.ts --network sepolia --parameters ignition/parameters/celo-sepolia.json",
+    "deploy:goodcred:celo": "hardhat ignition deploy ignition/modules/GoodCred.ts --network celo --parameters ignition/parameters/celo-mainnet.json",
+    "deploy:goodcred:fuse": "hardhat ignition deploy ignition/modules/GoodCred.ts --network fuse --parameters ignition/parameters/fuse-mainnet.json",
     "verify": "hardhat verify",
     "clean": "hardhat clean",
     "typechain": "hardhat typechain"
@@ -47,6 +50,7 @@
     "viem": "^2.0.0"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.0.0"
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^17.2.3"
   }
 }

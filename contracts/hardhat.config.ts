@@ -1,5 +1,9 @@
 import type { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox-viem";
+import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-verify";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -14,15 +18,23 @@ const config: HardhatUserConfig = {
   networks: {
     // Celo Mainnet
     celo: {
-      url: "https://forno.celo.org",
+      url: process.env.CELO_RPC_URL || "https://forno.celo.org",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       chainId: 42220,
     },
-    // Celo Alfajores Testnet
-    alfajores: {
-      url: "https://alfajores-forno.celo-testnet.org",
+    // Celo Sepolia Testnet (replaces deprecated Alfajores)
+    sepolia: {
+      url:
+        process.env.CELO_SEPOLIA_RPC_URL ||
+        "https://forno.celo-sepolia.celo-testnet.org/",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 44787,
+      chainId: 11142220,
+    },
+    // Fuse Mainnet
+    fuse: {
+      url: "https://rpc.fuse.io",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 122,
     },
     // Local development
     localhost: {
@@ -33,7 +45,7 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       celo: process.env.CELOSCAN_API_KEY || "",
-      alfajores: process.env.CELOSCAN_API_KEY || "",
+      sepolia: process.env.CELOSCAN_API_KEY || "",
     },
     customChains: [
       {
@@ -45,11 +57,11 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: "alfajores",
-        chainId: 44787,
+        network: "sepolia",
+        chainId: 11142220,
         urls: {
-          apiURL: "https://api-alfajores.celoscan.io/api",
-          browserURL: "https://alfajores.celoscan.io",
+          apiURL: "https://api-sepolia.celoscan.io/api",
+          browserURL: "https://celo-sepolia.blockscout.com",
         },
       },
     ],
