@@ -54,7 +54,7 @@ export function isValidEthereumAddress(address: string): boolean {
  */
 export function truncateAddress(address: string, chars = 4): string {
   if (!isValidEthereumAddress(address)) return address;
-  return `${address.slice(0, chars + 2)}...${address.slice(-(chars))}`;
+  return `${address.slice(0, chars + 2)}...${address.slice(-chars)}`;
 }
 
 /**

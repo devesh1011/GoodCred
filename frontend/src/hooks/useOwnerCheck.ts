@@ -26,7 +26,11 @@ const OWNER_ABI = [
 export function useOwnerCheck() {
   const { address } = useAccount();
 
-  const { data: owner, isLoading, error } = useReadContract({
+  const {
+    data: owner,
+    isLoading,
+    error,
+  } = useReadContract({
     address: CONTRACT_ADDRESSES.QUEST_REGISTRY as `0x${string}`,
     abi: OWNER_ABI,
     functionName: "owner",

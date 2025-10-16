@@ -24,7 +24,9 @@ export default function AdminQuestsPage() {
       <div className="flex items-center justify-between border-b pb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Manage Quests</h1>
-          <p className="text-gray-600 mt-2">Create and manage all available quests</p>
+          <p className="text-gray-600 mt-2">
+            Create and manage all available quests
+          </p>
         </div>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
@@ -64,7 +66,8 @@ export default function AdminQuestsPage() {
           Quest List Coming Soon
         </h3>
         <p className="text-gray-600">
-          Once you create quests, they will appear here in a sortable, filterable table.
+          Once you create quests, they will appear here in a sortable,
+          filterable table.
         </p>
         <p className="text-sm text-gray-500 mt-4">
           In the meantime, you can create quests using the form above.
@@ -75,11 +78,15 @@ export default function AdminQuestsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 opacity-50">
           <h3 className="font-semibold text-gray-700">Search</h3>
-          <p className="text-sm text-gray-600 mt-2">Find quests by description</p>
+          <p className="text-sm text-gray-600 mt-2">
+            Find quests by description
+          </p>
         </div>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 opacity-50">
           <h3 className="font-semibold text-gray-700">Filter</h3>
-          <p className="text-sm text-gray-600 mt-2">By type, status, or points</p>
+          <p className="text-sm text-gray-600 mt-2">
+            By type, status, or points
+          </p>
         </div>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 opacity-50">
           <h3 className="font-semibold text-gray-700">Bulk Actions</h3>

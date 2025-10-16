@@ -68,13 +68,11 @@ export function OwnerGuard({ children, fallbackRoute = "/" }: OwnerGuardProps) {
           <div className="space-y-2 text-red-800 text-sm">
             <p>You do not have permission to access the admin dashboard.</p>
             <p>
-              <strong>Your wallet:</strong>{" "}
-              {connectedWallet?.slice(0, 6)}...
+              <strong>Your wallet:</strong> {connectedWallet?.slice(0, 6)}...
               {connectedWallet?.slice(-4)}
             </p>
             <p>
-              <strong>Owner wallet:</strong>{" "}
-              {currentOwner?.slice(0, 6)}...
+              <strong>Owner wallet:</strong> {currentOwner?.slice(0, 6)}...
               {currentOwner?.slice(-4)}
             </p>
           </div>

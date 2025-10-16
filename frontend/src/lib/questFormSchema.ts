@@ -43,10 +43,7 @@ export const questFormSchema = z.object({
   // Optional fields
   isActive: z.boolean().default(true),
 
-  deadline: z
-    .number()
-    .positive("Deadline must be in the future")
-    .optional(),
+  deadline: z.number().positive("Deadline must be in the future").optional(),
 });
 
 // Infer type from schema

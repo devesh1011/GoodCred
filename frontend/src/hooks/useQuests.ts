@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAccount, useReadContracts } from "wagmi";
 import { useQuestRegistry } from "@/hooks/useGoodCred";
 import {
@@ -46,7 +46,7 @@ const QUEST_REGISTRY_ABI = [
  */
 export function useQuests() {
   const { isConnected, address } = useAccount();
-  const { questIds, questsLoading: questIdsLoading } = useQuestRegistry();
+  const { questIds } = useQuestRegistry();
   const [quests, setQuests] = useState<UIQuest[]>([]);
   const [loading, setLoading] = useState(true);
   const [useMockData, setUseMockData] = useState(false);
@@ -58,6 +58,17 @@ export function useQuests() {
   const [inProgressQuests, setInProgressQuests] = useState<Set<string>>(
     new Set()
   );
+
+  // Track if we've loaded contract quests to avoid re-processing
+  const questsProcessedRef = useRef(false);
+  const completedQuestsRef = useRef<Set<string>>(new Set());
+  const inProgressQuestsRef = useRef<Set<string>>(new Set());
+
+  // Update refs whenever the states change
+  useEffect(() => {
+    completedQuestsRef.current = completedQuests;
+    inProgressQuestsRef.current = inProgressQuests;
+  }, [completedQuests, inProgressQuests]);
 
   // Prepare batch contract reads for all quest IDs
   const questContracts = (questIds || []).map((questId) => ({
@@ -118,6 +129,7 @@ export function useQuests() {
         setQuests(getMockQuests());
         setLoading(false);
         setUseMockData(true);
+        questsProcessedRef.current = false;
         return;
       }
 
@@ -132,6 +144,12 @@ export function useQuests() {
         setQuests(getMockQuests());
         setLoading(false);
         setUseMockData(true);
+        questsProcessedRef.current = false;
+        return;
+      }
+
+      // Only process once when contract data is ready
+      if (questsProcessedRef.current) {
         return;
       }
 
@@ -154,7 +172,12 @@ export function useQuests() {
 
           if (validQuests.length > 0) {
             const uiQuests = validQuests.map((quest, index) =>
-              contractQuestToUI(quest, index, completedQuests, inProgressQuests)
+              contractQuestToUI(
+                quest,
+                index,
+                completedQuestsRef.current,
+                inProgressQuestsRef.current
+              )
             );
 
             console.log(
@@ -162,11 +185,13 @@ export function useQuests() {
             );
             setQuests(uiQuests);
             setUseMockData(false);
+            questsProcessedRef.current = true;
           } else {
             // No valid quests loaded, fall back to mock
             console.log("No valid quests loaded, using mock data");
             setQuests(getMockQuests());
             setUseMockData(true);
+            questsProcessedRef.current = true;
           }
         }
 
@@ -176,6 +201,7 @@ export function useQuests() {
         setQuests(getMockQuests());
         setUseMockData(true);
         setLoading(false);
+        questsProcessedRef.current = true;
       }
     };
 
@@ -186,8 +212,6 @@ export function useQuests() {
     questsLoading,
     questsSuccess,
     questsData,
-    completedQuests,
-    inProgressQuests,
   ]);
 
   // Mark quest as in progress

@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { refinedQuestFormSchema, type QuestFormData } from "@/lib/questFormSchema";
+import {
+  refinedQuestFormSchema,
+  type QuestFormData,
+} from "@/lib/questFormSchema";
 import { ZodError } from "zod";
 
 interface QuestFormProps {
@@ -29,7 +32,8 @@ export function QuestForm({
     targetContract: (defaultValues?.targetContract as `0x${string}`) || "",
     reclaimProvider: defaultValues?.reclaimProvider || "",
     reclaimDataKey: defaultValues?.reclaimDataKey || "",
-    reclaimVerificationUrl: (defaultValues?.reclaimVerificationUrl as string) || "",
+    reclaimVerificationUrl:
+      (defaultValues?.reclaimVerificationUrl as string) || "",
     isActive: defaultValues?.isActive ?? true,
   });
 
@@ -203,7 +207,9 @@ export function QuestForm({
               disabled={isFormDisabled}
             />
             {errors.reclaimProvider && (
-              <p className="mt-1 text-sm text-red-600">{errors.reclaimProvider}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.reclaimProvider}
+              </p>
             )}
           </div>
 
@@ -225,7 +231,9 @@ export function QuestForm({
               disabled={isFormDisabled}
             />
             {errors.reclaimDataKey && (
-              <p className="mt-1 text-sm text-red-600">{errors.reclaimDataKey}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.reclaimDataKey}
+              </p>
             )}
           </div>
 
