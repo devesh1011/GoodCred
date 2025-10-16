@@ -15,6 +15,7 @@
     "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@rainbow-me/rainbowkit": "^2.2.9",
+    "@reclaimprotocol/js-sdk": "^4.5.1",
     "@tanstack/react-query": "^5.90.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

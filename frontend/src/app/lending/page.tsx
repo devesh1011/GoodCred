@@ -11,39 +11,91 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, TrendingUp, Users, DollarSign } from "lucide-react";
+import {
+  AlertCircle,
+  TrendingUp,
+  Users,
+  DollarSign,
+  Loader2,
+} from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useGoodCredScore, useLendingPool } from "@/hooks/useGoodCred";
+import { useAccount } from "wagmi";
+import { formatEther } from "viem";
 
 export default function LendingPage() {
   const [borrowAmount, setBorrowAmount] = useState("");
   const [lendAmount, setLendAmount] = useState("");
 
-  // Mock data - replace with actual data from your backend/blockchain
-  const userScore = 550;
+  const { isConnected } = useAccount();
+  const { score, scoreLoading } = useGoodCredScore();
+  const {
+    totalDeposited,
+    totalLoading,
+    userLoan,
+    loanLoading,
+    hasActiveLoan,
+    borrow,
+    borrowLoading,
+    repay,
+    repayLoading,
+    deposit,
+    depositLoading,
+    refetchLoan,
+  } = useLendingPool();
+
+  // Calculate eligibility and loan terms
   const minScoreRequired = 500;
-  const isEligible = userScore >= minScoreRequired;
-  const maxLoanAmount = isEligible ? Math.floor(userScore / 5.5) : 0; // Simple calculation
+  const isEligible = score >= minScoreRequired;
+  const maxLoanAmount = isEligible ? Math.floor(score / 5.5) : 0;
   const interestRate = 5; // 5%
   const loanFee = borrowAmount
     ? parseFloat(borrowAmount) * (interestRate / 100)
     : 0;
   const totalRepayment = borrowAmount ? parseFloat(borrowAmount) + loanFee : 0;
 
-  // Lending pool stats
-  const totalPoolSize = 50000;
-  const totalBorrowed = 35000;
+  // Lending pool stats - use real data from contract
+  const totalPoolSize = totalDeposited ? parseFloat(totalDeposited) : 0;
+  const totalBorrowed = 0; // TODO: Get from contract
   const availableFunds = totalPoolSize - totalBorrowed;
-  const poolUtilization = (totalBorrowed / totalPoolSize) * 100;
+  const poolUtilization =
+    totalPoolSize > 0 ? (totalBorrowed / totalPoolSize) * 100 : 0;
   const aprForLenders = 8.5; // 8.5% APR
 
   const handleBorrow = () => {
-    // Implement borrowing logic
-    console.log("Borrowing:", borrowAmount);
+    if (!borrowAmount || parseFloat(borrowAmount) <= 0) {
+      alert("Please enter a valid amount");
+      return;
+    }
+    if (parseFloat(borrowAmount) > maxLoanAmount) {
+      alert(`Maximum loan amount is ${maxLoanAmount} G$`);
+      return;
+    }
+    borrow(borrowAmount);
+
+    // Refresh loan data after transaction
+    setTimeout(() => {
+      refetchLoan();
+    }, 3000);
+  };
+
+  const handleRepay = () => {
+    if (!userLoan) return;
+    repay(Number(userLoan.loanId));
+
+    // Refresh loan data after transaction
+    setTimeout(() => {
+      refetchLoan();
+    }, 3000);
   };
 
   const handleLend = () => {
-    // Implement lending logic
-    console.log("Lending:", lendAmount);
+    if (!lendAmount || parseFloat(lendAmount) <= 0) {
+      alert("Please enter a valid amount");
+      return;
+    }
+    deposit(lendAmount);
+    setLendAmount("");
   };
 
   return (
@@ -90,8 +142,8 @@ export default function LendingPage() {
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {isEligible
-                          ? `Your credit score of ${userScore} qualifies you for loans up to ${maxLoanAmount} G$`
-                          : `You need a minimum score of ${minScoreRequired}. Your current score is ${userScore}.`}
+                          ? `Your credit score of ${score} qualifies you for loans up to ${maxLoanAmount} G$`
+                          : `You need a minimum score of ${minScoreRequired}. Your current score is ${score}.`}
                       </div>
                       {isEligible && (
                         <div className="grid grid-cols-2 gap-4 pt-2">
@@ -100,7 +152,7 @@ export default function LendingPage() {
                               Your Score
                             </div>
                             <div className="text-xl font-bold text-green-500">
-                              {userScore}
+                              {score}
                             </div>
                           </div>
                           <div>
@@ -167,11 +219,65 @@ export default function LendingPage() {
                       disabled={
                         !borrowAmount ||
                         parseFloat(borrowAmount) <= 0 ||
-                        parseFloat(borrowAmount) > maxLoanAmount
+                        parseFloat(borrowAmount) > maxLoanAmount ||
+                        borrowLoading ||
+                        hasActiveLoan ||
+                        !isConnected
                       }
                     >
-                      Confirm Loan
+                      {borrowLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          Borrowing...
+                        </>
+                      ) : hasActiveLoan ? (
+                        "Active Loan Exists"
+                      ) : (
+                        "Confirm Loan"
+                      )}
                     </Button>
+
+                    {/* Show active loan repayment */}
+                    {hasActiveLoan && userLoan && (
+                      <div className="mt-4 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                        <div className="font-semibold mb-2">Active Loan</div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                              Amount Due:
+                            </span>
+                            <span className="font-medium">
+                              {formatEther(userLoan.amountDue)} G$
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                              Due Date:
+                            </span>
+                            <span className="font-medium">
+                              {new Date(
+                                Number(userLoan.dueDate) * 1000
+                              ).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <Button
+                            className="w-full mt-2"
+                            variant="destructive"
+                            onClick={handleRepay}
+                            disabled={repayLoading || !isConnected}
+                          >
+                            {repayLoading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                Repaying...
+                              </>
+                            ) : (
+                              "Repay Loan"
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -206,7 +312,11 @@ export default function LendingPage() {
                       </span>
                     </div>
                     <div className="text-2xl font-bold">
-                      {totalPoolSize.toLocaleString()} G$
+                      {totalLoading ? (
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                      ) : (
+                        `${totalPoolSize.toLocaleString()} G$`
+                      )}
                     </div>
                   </div>
                   <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10">
@@ -277,9 +387,21 @@ export default function LendingPage() {
                   <Button
                     className="w-full"
                     onClick={handleLend}
-                    disabled={!lendAmount || parseFloat(lendAmount) <= 0}
+                    disabled={
+                      !lendAmount ||
+                      parseFloat(lendAmount) <= 0 ||
+                      depositLoading ||
+                      !isConnected
+                    }
                   >
-                    Deposit to Pool
+                    {depositLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        Depositing...
+                      </>
+                    ) : (
+                      "Deposit to Pool"
+                    )}
                   </Button>
                 </div>
 

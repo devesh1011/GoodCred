@@ -19,7 +19,14 @@ import GoodIDVerification from "@/components/GoodIDVerification";
 
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
-  const { score, scoreLoading, register, registerLoading } = useGoodCredScore();
+  const {
+    score,
+    scoreLoading,
+    isRegistered,
+    registeredLoading,
+    register,
+    registerLoading,
+  } = useGoodCredScore();
   const { totalDeposited, totalLoading } = useLendingPool();
   const queryClient = useQueryClient();
 
